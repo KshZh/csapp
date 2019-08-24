@@ -1,0 +1,39 @@
+# Execution begins at address 0 
+	.pos 0 
+	irmovq stack, %rsp  	# Set up stack pointer  
+	call main		# Execute main program
+	halt			# Terminate program 
+
+# Sample linked list
+.align 8
+ele1:
+	.quad 0x00a
+	.quad ele2
+ele2:
+	.quad 0x0b0
+	.quad ele3
+ele3:
+	.quad 0xc00
+	.quad 0
+
+
+main:	irmovq ele1,%rdi	
+	call sumi		# sumi(list)
+	ret 
+
+/* $begin sumi-ys */
+# long sumi(long *list)
+sumi:
+	xorq %rax,%rax		# sum = 0
+loop:	
+	mrmovq (%rdi),%r10
+	addq %r10,%rax		# sum+=%rdi->val
+	mrmovq 8(%rdi),%rdi	# %rdi=%rdi->next
+	andq %rdi,%rdi
+	jne loop
+	ret
+/* $end sumi-ys */
+
+# The stack starts here and grows to lower addresses
+	.pos 0x100		
+stack:	 

@@ -1,0 +1,43 @@
+# Execution begins at address 0 
+	.pos 0 
+	irmovq stack, %rsp  	# Set up stack pointer  
+	call main		# Execute main program
+	halt			# Terminate program 
+
+# Sample linked list
+.align 8
+ele1:
+	.quad 0x00a
+	.quad ele2
+ele2:
+	.quad 0x0b0
+	.quad ele3
+ele3:
+	.quad 0xc00
+	.quad 0
+
+
+main:	irmovq ele1,%rdi	
+	call sumr		# sumr(list)
+	ret 
+
+/* $begin sumr-ys */
+# long sumr(long *list)
+sumr:
+	andq %rdi,%rdi		# if %rdi==NULL
+	jne recursive
+	irmovq $0,%rax
+	ret			# return 0
+recursive:
+	mrmovq (%rdi),%r10	# current val, 但这一句不能放在递归调用前面，因为%r10的值会被递归调用覆盖
+	pushq %r10		# 正确应该将局部变量存入栈中，由于只有一个局部变量，所以这里直接用了pushq, popq指令，而不是通过$rsp进行内存访问
+	mrmovq 8(%rdi),%rdi	# update arguments, %rdi=%rdi->next
+	call sumr
+	popq %r10
+	addq %r10,%rax		# current val + rest
+	ret
+/* $end sumr-ys */
+
+# The stack starts here and grows to lower addresses
+	.pos 0x100		
+stack:	 
